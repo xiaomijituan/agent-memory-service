@@ -1,0 +1,7 @@
+# This machine has core.autocrlf=true; without this file every committed text
+# file turns CRLF and formatting checks go red on diffs that are pure line endings.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.sqlite binary
