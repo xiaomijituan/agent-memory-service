@@ -1,15 +1,40 @@
-# Verbatim 逐字记忆
+<div align="center">
+
+<h1>Verbatim 逐字记忆</h1>
+
+<p><strong>逐字保存 · 关键词 + 向量检索 · 自部署 · Add / Search</strong></p>
+
+<p>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=flat-square" alt="License"></a>
+  <img src="https://img.shields.io/badge/python-3.11-blue.svg?style=flat-square" alt="Python 3.11">
+  <a href="https://agentmemoryleaderboard.ai/competition"><img src="https://img.shields.io/badge/AML%20Cycle%202-Textual%20·%20Closed--source%20Methods-6b4eff.svg?style=flat-square" alt="AML Cycle 2"></a>
+  <a href="https://agentmemoryleaderboard.ai/results/cycle-2/"><img src="https://img.shields.io/badge/Official%20Score-56.44-22c55e.svg?style=flat-square" alt="Official Score 56.44"></a>
+  <a href="#评测成绩第二期官方结果"><img src="https://img.shields.io/badge/Best%20Smoke-71.97-f59e0b.svg?style=flat-square" alt="Best Smoke 71.97"></a>
+</p>
+
+</div>
+
+| 官方综合分 | 闭源方法榜 | 商业产品榜对照 | 距阿里云 Milvus |
+| :---: | :---: | :---: | :---: |
+| **56.44** | **69 / 125** | **超过 24 个商业产品** | **0.29 分** |
+
+> 同一分数体系的跨榜对照，不表示商业榜正式名次。[查看第二期官方结果](https://agentmemoryleaderboard.ai/results/cycle-2/)。
 
 **一套自行部署的长期记忆服务，面向 Agent（能自主调用工具、连续完成多步任务的 AI 程序）。对话中的每条消息都逐字保存，检索时同时使用关键词匹配与向量相似度。**
-
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/python-3.11-blue.svg)
-[![Agent Memory Challenge 2026](https://img.shields.io/badge/AML%202026-Textual%20·%20Commercial%20Track-6b4eff.svg)](https://agentmemories.ai/competition)
 
 服务以单进程运行，基于 FastAPI（Python 的 Web 框架）与 SQLite（单文件嵌入式数据库）。部署时不需要外部数据库，不需要消息队列，也不需要单独运维一套向量检索服务。
 
 *A self-hosted memory service for AI agents. Every message is kept word for word; retrieval is hybrid
 (BM25 + vectors). One container, one process, one directory of SQLite files. English summary at the bottom.*
+
+<p align="center">
+  <a href="#快速开始">快速开始</a> ·
+  <a href="#评测成绩第二期官方结果">评测成绩</a> ·
+  <a href="#从济南到-agent-memory-leaderboard">我的经历</a> ·
+  <a href="#接口">接口</a> ·
+  <a href="#设计取舍">设计取舍</a> ·
+  <a href="#english-summary">English</a>
+</p>
 
 ---
 
@@ -42,27 +67,47 @@ curl --fail http://127.0.0.1:8080/healthz
 > 镜像以非 root 用户运行，数据目录的属主必须是用户 ID（uid）`10001`。
 > 如果你挂载的目录是用 root 创建的，请在首次启动前执行 `chown 10001:10001 <目录>`。
 
-## 评测成绩（初步读数，官方审核中）
+## 评测成绩（第二期官方结果）
 
-Verbatim 为 **Agent Memory Challenge 2026** 开发，并在该赛事的统一评测平台上完成了一次完整评测。下表是平台返回的读数。
+Verbatim 为 **Agent Memory Challenge 2026** 开发，并在该赛事的统一评测平台上完成了一次完整评测。以下为第二期官方结果页读数。
 
 | 项 | 值 |
 | --- | --- |
 | 赛事 | Agent Memory Challenge 2026（中国图象图形学学会 CSIG 主办，Agent Memory Leaderboard 统一评测） |
-| 赛道 / 榜单 | 文本赛道 · 工业榜（商业产品榜） |
+| 赛道 / 榜单 | 文本记忆 · 闭源方法榜 |
 | 参评版本 | `v1.4` |
 | 模式 | `full`（完整评测，非抽样） |
 | 完成时间 | 2026-10-24 |
 | 判分题量 | **9,602 / 9,602**，全部判完 |
-| 平台返回的初步总分 | **0.5167**（即 51.67 / 100） |
+| 官方综合得分 | **56.44**（闭源方法榜 **69 / 125**） |
+| 商业榜分数对照 | 超过 **24 个商业产品**的得分；距阿里云 Milvus（56.73）差 **0.29** 分 |
+| 代表对照 | 高于小鹏科技 Somni（55.38）、浙江移动创新院 MemMate（55.22）、中兴 ZTE-XYDT-FlexMem（53.29） |
+| 平台任务平均分 | **0.5167**（即 51.67 / 100，与官方综合分计算方式不同） |
 
-以下三点限定了这个分数的含义，引用分数时必须一并说明：
+引用分数时必须一并说明：
 
-1. **这是初步读数，不是最终成绩。** 主办方正在审核，正式成绩、排名与获奖名单由主办方公布，
-   以 <https://agentmemories.ai/leaderboard/industry/textual> 为准。本仓库不宣称任何名次。
-2. **这个分数只能与同为 `full` 模式的读数比较。** 抽样模式（`smoke`）与本地自测的题目构成不同，
-   两者的总分不具备可比性。
-3. 本次评测由同一个任务从中断处继续执行并完成，参评版本、模型与算法全程未变，也没有新建第二次完整评测。
+1. **56.44 是第二期官方综合分，51.67 是完整评测任务的平台平均分。** 两者计算方式不同，不能互换。
+2. **商业产品榜与闭源方法榜为不同分榜。** 文中的比较是同一分数体系下的逐项对照，不表示商业榜正式名次。
+3. 抽样模式（`smoke`）与本地自测的题目构成不同，总分不具备可比性；最佳 Smoke 单次得分为 **71.97**，4 次平台评测全部成功。
+4. 本次完整评测由同一个任务从中断处继续执行并完成，参评版本、模型与算法全程未变，也没有新建第二次完整评测。
+
+官方结果页：<https://agentmemoryleaderboard.ai/results/cycle-2/>。
+
+## 从济南到 Agent Memory Leaderboard
+
+我 2022 年本科毕业，在济南的小公司做后端开发。不是名校，也没有大厂履历。工作不轻松，技术氛围也不浓，但我一直想把后端和架构学扎实。
+
+有一次面试，我提到自己系统学习过 Java 虚拟机（JVM，Java 程序的运行环境），却被质疑“学这么深有什么用”。那句话让我很受挫，也让我第一次认真面对一个问题：**环境不认可深度，不代表深度没有价值。**
+
+后来经济下行，工作更忙，我反而把学习挪到了深夜，经常学到凌晨两三点。Java 虚拟机、数据库、分布式系统、架构设计，能啃的硬骨头就继续啃。那时的我相信，起点低可以靠时间补，基础差可以靠反复补。
+
+AI 时代来了以后，我决定不再只做一个后端程序员。我开始学习 Agent、上下文工程（给 Agent 组织提示词、工具结果与历史信息）、工具调用和评估体系（用固定题目和指标反复测量效果），也学会了用 Code Agent（能读写代码、连续执行任务的 AI）拆任务：把一项看起来不可能完成的长工程，拆成许多可以先写失败测试、再实现到绿色的子任务。
+
+这是 Verbatim 的故事，也是我第一次参加 Agent Memory Challenge 的故事。一个普通本科、在济南小公司加班的人，靠着长期自学和 AI 的放大，把自己的作品送上了公开榜单。
+
+我对这个成绩满意。不是因为它能立刻证明什么，而是因为它证明了一件事：
+
+**起点低不等于终点低。AI 时代，努力终于有了放大器。**
 
 ## 为什么叫「逐字」
 
@@ -212,21 +257,20 @@ flowchart LR
   占用空间的是向量与索引，不是原文；这一分布与逐字保留原文的做法一致。
 - **并发上限按进程计算**，而服务只运行一个进程。需要扩容时，请为每个租户部署一个独立实例，
   而不是在同一个数据目录上增加工作进程。
-- **`DELETE` 只删除数据行，不缩小数据库文件。** 若要回收磁盘空间，需要另外执行一次 `VACUUM`
-  （SQLite 重建数据库文件以回收空间的命令），或者按用户库文件清理。这是一项独立的、需要授权的操作。
+- **`DELETE` 只删除数据行，不缩小数据库文件。** 若要回收磁盘空间，需要另外执行一次 `VACUUM`（SQLite 重建数据库文件以回收空间的命令），或者按用户库文件清理。这是一项独立的、需要授权的操作。
 
 ## 赛事与链接
 
-- 平台与榜单：<https://agentmemories.ai> · <https://agentmemories.ai/leaderboard/industry/textual>
-- 赛事页：<https://agentmemories.ai/competition>
-- 规则：<https://agentmemories.ai/rules>
-- 平台要求的 Add / Search 接口约定：<https://agentmemories.ai/api-guide>
-- 第二期 FAQ（评测模式、配额、模型资格）：<https://agentmemories.ai/blog?post=phase2-faq-20260920>
-- 第二期补充问答（版本登记、模型披露）：<https://agentmemories.ai/blog?post=phase2-faq-part2-20261022>
+- 平台与榜单：<https://agentmemoryleaderboard.ai> · <https://agentmemoryleaderboard.ai/results/cycle-2/>
+- 赛事页：<https://agentmemoryleaderboard.ai/competition>
+- 规则：<https://agentmemoryleaderboard.ai/rules>
+- 平台要求的 Add / Search 接口约定：<https://agentmemoryleaderboard.ai/api-guide>
+- 第二期 FAQ（评测模式、配额、模型资格）：<https://agentmemoryleaderboard.ai/blog?post=phase2-faq-20260920>
+- 第二期补充问答（版本登记、模型披露）：<https://agentmemoryleaderboard.ai/blog?post=phase2-faq-part2-20261022>
 - 官方数据集与评测仓库：<https://github.com/AML-memory/agent-memory-leaderboard>
 - Hugging Face：<https://huggingface.co/agent-memory-leaderboard>
 
-**模型披露**（商业产品榜要求参赛方说明模型使用情况）：服务运行时只使用**一个**模型——`text-embedding-v4`（1024 维），通过在线嵌入模型 API 调用，仅用于入库索引与查询编码。**Add 与 Search 的任何环节都不使用语言模型，也不使用重排模型（reranker，指对召回结果再做一次相关性排序的模型）。** 官方评测中的答案生成与判分，由平台自己的模型完成。
+**模型披露**（赛事要求参赛方说明模型使用情况）：服务运行时只使用**一个**模型——`text-embedding-v4`（1024 维），通过在线嵌入模型 API 调用，仅用于入库索引与查询编码。**Add 与 Search 的任何环节都不使用语言模型，也不使用重排模型（reranker，指对召回结果再做一次相关性排序的模型）。** 官方评测中的答案生成与判分，由平台自己的模型完成。
 
 ## 独立开发者与 AI 协作的实现方式
 
@@ -287,15 +331,23 @@ No external database, no queue, no vector service to operate. `AMC_EMBEDDING_MOD
 with zero outbound calls.
 
 Built for the **Agent Memory Challenge 2026** (CSIG, Agent Memory Leaderboard), textual track /
-commercial-product leaderboard. One complete `full` evaluation finished on 2026-10-24 with all
-**9,602 / 9,602** questions scored; the platform returned a **preliminary** total of **0.5167**.
-Official review is in progress — final results, rankings and awards are published by the organizers at
-<https://agentmemories.ai/leaderboard/industry/textual>, not here. Only the embedding model
-`text-embedding-v4` (1024-dim) is used; no LLM and no reranker anywhere in Add or Search.
+closed-source-methods leaderboard. A complete `full` task scored all **9,602 / 9,602** questions on
+2026-10-24. Cycle 2 gives Verbatim an official overall score of **56.44** (**69 / 125**). In a same-score
+comparison, that is higher than the scores of **24** commercial products on the commercial-product
+leaderboard and **0.29** below Alibaba Cloud Milvus (56.73). The complete `full` task's platform-reported
+average remains **0.5167**; the two figures use different aggregation. Official results:
+<https://agentmemoryleaderboard.ai/results/cycle-2/>. Only the embedding model `text-embedding-v4`
+(1024-dim) is used; no LLM and no reranker anywhere in Add or Search.
 
 Solo project, built test-first with heavy agentic-AI use: decisions live in numbered architecture records,
 progress lives in one evidence-bearing ledger, and every claim about capacity or quality was measured on the
 real deployment before it was written down.
+
+Verbatim is also a personal milestone. I graduated with a bachelor's degree in 2022 and worked as a backend
+engineer at small companies in Jinan, where deep technical study was often treated as impractical. I kept
+learning after work, sometimes until 2 or 3 a.m. When agentic AI arrived, I decided to become more than a
+backend programmer. This was my first competition; building and shipping Verbatim with Code Agents proved
+that consistent effort, amplified by AI, can compete on a public benchmark.
 
 ## 许可证
 
